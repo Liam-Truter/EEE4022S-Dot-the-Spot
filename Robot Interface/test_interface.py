@@ -6,17 +6,19 @@ def increase_step():
     global step_size
     step_size_idx = min(len(step_sizes)-1,step_size_idx+1)
     step_size = step_sizes[step_size_idx]
+    step_var.set(step_size_idx)
 
 def decrease_step():
     global step_size_idx
     global step_size
     step_size_idx = max(0,step_size_idx-1)
     step_size = step_sizes[step_size_idx]
+    step_var.set(step_size_idx)
 
-def step_scaled(step):
+def step_size_selected():
     global step_size_idx
     global step_size
-    step_size_idx = int(step)
+    step_size_idx = step_var.get()
     step_size = step_sizes[step_size_idx]
 
 def move_forward():
@@ -55,12 +57,27 @@ root.title("Test Calibration Interface")
 step_sizes = [0.1, 0.5, 1, 5, 10, 50]
 step_size_idx = 2
 step_size = step_sizes[step_size_idx]
+# Variable for radio button
+step_var = tk.IntVar()
+step_var.set(step_size_idx) # Default to starting step size
 
 # Bind keys
 bind_keys()
 
-step_scale = tk.Scale(root, from_=0, to=len(step_sizes)-1, orient=tk.HORIZONTAL, command=step_scaled)
-step_scale.pack(pady=20)
+# Step size radio button list
+step_selection = tk.Frame(root)
+step_selection.pack(pady=10)
+
+# Iterate through each step size
+for i in range(len(step_sizes)):
+    # Step size label
+    step_label = tk.Label(step_selection, text=str(step_sizes[i]))
+    step_label.grid(row=0, column=i, padx=5)
+
+    # Step size radio button
+    step_radio = tk.Radiobutton(step_selection, variable=step_var, value=i, command=step_size_selected)
+    step_radio.grid(row=1, column=i, padx=5)
+
 
 # Button dimensions
 btn_width = 5
