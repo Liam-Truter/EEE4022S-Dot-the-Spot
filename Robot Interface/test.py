@@ -22,7 +22,7 @@ def update():
     # Step size in mm
     step_size = 10
 
-    # Calibrated max dimensions of the robot (OT-One hood)
+    # Calibrated max dimensions of the robot in mm (OT-One hood)
     xlim = [0, 375]
     ylim = [0, 250]
     zlim = [-100, 100]
