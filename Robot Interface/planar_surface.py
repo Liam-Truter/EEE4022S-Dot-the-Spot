@@ -60,7 +60,7 @@ class PlanarSurface:
         # Get row index
         rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
         row = rows.index(well[0])
-        
+
         # Get column index
         col = int(well[1:]) - 1
 
@@ -71,6 +71,7 @@ class PlanarSurface:
 
 def main():
     ps = PlanarSurface()
+
     p1 = Vector({'x': 215.00, 'y': 4.00, 'z': -46.50})
     p2 = Vector({'x': 285.00, 'y': 4.00, 'z': -48.30})
     p3 = Vector({'x': 285.00, 'y': 114.50, 'z': -51.50})
@@ -82,8 +83,21 @@ def main():
 
     ax.scatter(ps.points[:,:,0],ps.points[:,:,1],ps.points[:,:,2])
     plt.show()
+    rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+    targets = []
 
-    print(ps.wells("A1"))
+    source_well_pos = Vector(227,240,15)
+    p10 = instruments.Pipette(axis='b')
+    for row in rows:
+        for col in cols:
+            targets.append(row + col)
+    for i in range(10):
+        robot.move_to(source_well_pos)
+        for j in range(10):
+            if 10*i + j < 96:
+                pass
+
 
 if __name__ == '__main__':
     main()
