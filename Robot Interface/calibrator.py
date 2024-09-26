@@ -27,6 +27,7 @@ class Calibrator:
         self.root.bind('<d>', lambda event: self.move_right())
         self.root.bind('<e>', lambda event: self.move_up())
         self.root.bind('<q>', lambda event: self.move_down())
+        self.root.bind('<f>', lambda event: self.move_plunger_down())
 
         # Step size radio button list
         self.step_selection = tk.Frame(self.root)
@@ -47,7 +48,7 @@ class Calibrator:
         btn_width = 5
         btn_height = 2
 
-        # First set of arrow buttons (forward, backward, left, right)
+        # Head buttons (forward, backward, left, right)
         frame_fblr = tk.Frame(self.root)
         frame_fblr.pack(pady=10)
 
@@ -63,7 +64,7 @@ class Calibrator:
         btn_right = tk.Button(frame_fblr, text="→", command=self.move_right, width=btn_width, height=btn_height)
         btn_right.grid(row=1, column=2)
 
-        # Second set of buttons (up and down)
+        # Head up and down buttons
         frame_ud = tk.Frame(self.root)
         frame_ud.pack(pady=10)
 
@@ -73,7 +74,13 @@ class Calibrator:
         btn_down = tk.Button(frame_ud, text="↓", command=self.move_down, width=btn_width, height=btn_height)
         btn_down.grid(row=1, column=0)
 
+        # Plunger select
+        frame_ps = tk.Frame(self.root)
+        frame_ps.pack(pady=10)
+        
+
         self.root.mainloop()
+        print("Test")
     
     def increase_step(self):
         self.step_size_idx = min(len(self.step_sizes)-1,self.step_size_idx+1)
@@ -112,15 +119,21 @@ class Calibrator:
     def move_down(self):
         bot_pos = robot._driver.get_head_position()['current']['z']
         robot.move_head(z=bot_pos-self.step_size)
+    
+    def move_plunger_down(self):
+        axis = 'b'
+        plunger_pos = robot._driver.get_plunger_positions()['current'][axis]
+        plunger_target = {axis: plunger_pos+self.step_size}
+        robot.move_plunger(**plunger_target)
 
 def main():
     calibrator = Calibrator()
     robot.connect(robot.get_serial_ports_list()[0])
     robot.home()
-    print(robot._driver.get_position())
     calibrator.start()
-    print("Restarting calibrator")
-    calibrator.start()
+    print(robot._driver.get_head_position()['current'])
+    plunger_positions = robot._driver.get_plunger_positions()
+    print(plunger_positions)
     
 
 if __name__ == '__main__':
