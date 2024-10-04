@@ -3,7 +3,9 @@ import tkinter as tk
 
 class Calibrator:
     def __init__(self):
-        pass
+        self.xlim = (0,375)
+        self.ylim = (0,250)
+        self.zlim = (-150,100)
     
     def start(self):
         self.root = tk.Tk()
@@ -28,6 +30,7 @@ class Calibrator:
         self.root.bind('<e>', lambda event: self.move_up())
         self.root.bind('<q>', lambda event: self.move_down())
         self.root.bind('<f>', lambda event: self.move_plunger_down())
+        self.root.bind('<r>', lambda event: self.move_plunger_up())
 
         # Step size radio button list
         self.step_selection = tk.Frame(self.root)
@@ -77,7 +80,7 @@ class Calibrator:
         # Plunger select
         frame_ps = tk.Frame(self.root)
         frame_ps.pack(pady=10)
-        
+
 
         self.root.mainloop()
         print("Test")
@@ -96,34 +99,49 @@ class Calibrator:
         self.step_size_idx = self.step_var.get()
         self.step_size = self.step_sizes[self.step_size_idx]
     
+    def move_constrained(self, **kwargs):
+        if 'x' in kwargs.keys():
+            kwargs['x'] = max(min(kwargs['x'],self.xlim[1]), self.xlim[0])
+        if 'y' in kwargs.keys():
+            kwargs['y'] = max(min(kwargs['y'],self.ylim[1]), self.ylim[0])
+        if 'z' in kwargs.keys():
+            kwargs['z'] = max(min(kwargs['z'],self.zlim[1]), self.zlim[0])
+        robot.move_head(**kwargs)
+
     def move_forward(self):
         bot_pos = robot._driver.get_head_position()['current']['y']
-        robot.move_head(y=bot_pos+self.step_size)
+        self.move_constrained(y=bot_pos+self.step_size)
     
     def move_backward(self):
         bot_pos = robot._driver.get_head_position()['current']['y']
-        robot.move_head(y=bot_pos-self.step_size)
+        self.move_constrained(y=bot_pos-self.step_size)
     
     def move_left(self):
         bot_pos = robot._driver.get_head_position()['current']['x']
-        robot.move_head(x=bot_pos-self.step_size)
+        self.move_constrained(x=bot_pos-self.step_size)
 
     def move_right(self):
         bot_pos = robot._driver.get_head_position()['current']['x']
-        robot.move_head(x=bot_pos+self.step_size)
+        self.move_constrained(x=bot_pos+self.step_size)
 
     def move_up(self):
         bot_pos = robot._driver.get_head_position()['current']['z']
-        robot.move_head(z=bot_pos+self.step_size)
+        self.move_constrained(z=bot_pos+self.step_size)
 
     def move_down(self):
         bot_pos = robot._driver.get_head_position()['current']['z']
-        robot.move_head(z=bot_pos-self.step_size)
+        self.move_constrained(z=bot_pos-self.step_size)
     
     def move_plunger_down(self):
         axis = 'b'
         plunger_pos = robot._driver.get_plunger_positions()['current'][axis]
         plunger_target = {axis: plunger_pos+self.step_size}
+        robot.move_plunger(**plunger_target)
+
+    def move_plunger_up(self):
+        axis = 'b'
+        plunger_pos = robot._driver.get_plunger_positions()['current'][axis]
+        plunger_target = {axis: plunger_pos-self.step_size}
         robot.move_plunger(**plunger_target)
 
 def main():
