@@ -18,7 +18,8 @@ def fit_plane(points: np.array) -> np.array:
 
 output_dir="output_contact"
 
-corner_file_idxs = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+weights = [76.4, 21.1, 79.5, 94.5, 49.6, 39.8, 55.9, 81.9, 71.4]
+mmpg = 0.09
 surface_file_idxs = ['1.1', '2.1', '3', '4.1', '5', '6', '7', '8', '9']
 
 calib_coord_file = os.path.join(output_dir, 'Corner info - 0.npy')
@@ -32,14 +33,9 @@ calibration_coords -= origin
 
 errors = np.zeros((9,96))
 
-for i in range(len(corner_file_idxs)):
-    corner_file_idx = corner_file_idxs[i]
-    corner_file = os.path.join(output_dir, f'Corner info - {corner_file_idx}.npy')
-    corners = np.load(corner_file) - origin
-
-    X_corners = corners[:,0]
-    Y_corners = corners[:,1]
-    Z_corners = corners[:,2]
+for i in range(len(weights)):
+    weight = weights[i]
+    height_estimate = mmpg*weight
 
     surface_file_idx = surface_file_idxs[i]
     surface_file = os.path.join(output_dir, f"Surface info - {surface_file_idx}.npy")
@@ -51,20 +47,10 @@ for i in range(len(corner_file_idxs)):
 
     heights = np.zeros(4)
 
-    printstring = f"Plate {corner_file_idx}:"
-
-    for j in range(4):
-        heights[j] = corners[j,2] - calibration_coords[j,2]
-        printstring += f"\t{heights[j]:.1f}"
-
-    #print(printstring)
-
-    a,b,d = fit_plane(corners)
+    a,b,d = (0,0,height_estimate)
 
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
-
-    ax.scatter(X_corners,Y_corners,Z_corners, color='b')
 
     ax.scatter(X_surface,Y_surface,Z_surface, color='g')
     ax.set_zlim(0,12)
@@ -78,7 +64,7 @@ for i in range(len(corner_file_idxs)):
 
     error = Z_plane - Z_surface
 
-    print(f"Error Plate {corner_file_idx}:")
+    print(f"Error Plate {i+1}:")
     print("Mean\tMax\tMin\tRMSE")
 
     mean_error = np.mean(error)

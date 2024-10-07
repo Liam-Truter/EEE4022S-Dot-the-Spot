@@ -18,7 +18,16 @@ def fit_plane(points: np.array) -> np.array:
 
 output_dir="output_contact"
 
-corner_file_idxs = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+heights = np.array([
+           [6.2, 7.0, 5.8, 7.0],
+           [2.2, 2.5, 3.3, 2.3],
+           [6.5, 7.3, 6.0, 6.5],
+           [8.4, 6.5, 6.9, 8.6],
+           [5.0, 3.9, 3.5, 4.5],
+           [3.1, 4.4, 4.3, 3.8],
+           [4.5, 2.2, 5.0, 6.4],
+           [5.0, 4.5, 9.9, 9.8],
+           [5.5, 7.4, 5.7, 5.3]])
 surface_file_idxs = ['1.1', '2.1', '3', '4.1', '5', '6', '7', '8', '9']
 
 calib_coord_file = os.path.join(output_dir, 'Corner info - 0.npy')
@@ -32,14 +41,10 @@ calibration_coords -= origin
 
 errors = np.zeros((9,96))
 
-for i in range(len(corner_file_idxs)):
-    corner_file_idx = corner_file_idxs[i]
-    corner_file = os.path.join(output_dir, f'Corner info - {corner_file_idx}.npy')
-    corners = np.load(corner_file) - origin
-
-    X_corners = corners[:,0]
-    Y_corners = corners[:,1]
-    Z_corners = corners[:,2]
+for i in range(len(heights)):
+    corner_heights = heights[i,:]
+    corner_points = np.copy(calibration_coords)
+    corner_points[:,2] += corner_heights
 
     surface_file_idx = surface_file_idxs[i]
     surface_file = os.path.join(output_dir, f"Surface info - {surface_file_idx}.npy")
@@ -49,22 +54,10 @@ for i in range(len(corner_file_idxs)):
     Y_surface = surface[:,1]
     Z_surface = surface[:,2]
 
-    heights = np.zeros(4)
-
-    printstring = f"Plate {corner_file_idx}:"
-
-    for j in range(4):
-        heights[j] = corners[j,2] - calibration_coords[j,2]
-        printstring += f"\t{heights[j]:.1f}"
-
-    #print(printstring)
-
-    a,b,d = fit_plane(corners)
+    a,b,d = fit_plane(corner_points)
 
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
-
-    ax.scatter(X_corners,Y_corners,Z_corners, color='b')
 
     ax.scatter(X_surface,Y_surface,Z_surface, color='g')
     ax.set_zlim(0,12)
@@ -78,7 +71,7 @@ for i in range(len(corner_file_idxs)):
 
     error = Z_plane - Z_surface
 
-    print(f"Error Plate {corner_file_idx}:")
+    print(f"Error Plate {i+1}:")
     print("Mean\tMax\tMin\tRMSE")
 
     mean_error = np.mean(error)
