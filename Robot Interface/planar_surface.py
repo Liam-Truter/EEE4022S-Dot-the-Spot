@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 class PlanarSurface:
     def __init__(self):
-        self.spacing = 8 # Spacing between points in mm
+        self.spacing = 9 # Spacing between points in mm
     def create_from_points(self, p1: Vector, p2: Vector, p3: Vector):
         spacing = self.spacing
 
@@ -56,6 +56,9 @@ class PlanarSurface:
                 # Coordinate of well point at row, column
                 self.points[i][j] = np.array([self.x[i], self.y[j], self.z[i][j]])
     
+    def create_from_plane(self, a, b, d):
+        pass
+
     def wells(self, well: str) -> Vector:
         # Get row index
         rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']

@@ -75,7 +75,7 @@ baseline_depth = 0
 corner_point = Vector(233.00, 0.00, -5.00)
 
 output_dir = "output_contact"
-calibrate = False
+calibrate = True
 if calibrate:
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -83,6 +83,7 @@ if calibrate:
     baseline_depth = find_depth(4,True)
 
     calib_coords = np.zeros((5,3))
+    calib_coords[0,:] = np.array(baseline_depth.to_tuple())
 
     for i in range(4):
         while weight_reader.get_weight() > natural_weight + force_threshold/5:
@@ -90,25 +91,12 @@ if calibrate:
         coord = find_depth(i, True)
         calib_coords[i+1,:] = np.array(coord.to_tuple())
 
-    filename = "Empty_plate_calib.npy"
+    filename = "Empty_plate_calib_v2.npy"
     filename = os.path.join(output_dir,filename)
     np.save(filename, calib_coords)
 
     while weight_reader.get_weight() > natural_weight + force_threshold/5:
         pass
-filename = os.path.join(output_dir, f"Surface info - 2.npy")
-coords = np.load(filename)
-
-filename=input("Enter a name: ")
-filename = os.path.join(output_dir, f"Surface info - {filename}.npy")
-
-
-natural_weight = weight_reader.get_weight()
-coord = find_depth((2,5))
-coords[2*12+5,:] = np.array(coord.to_tuple())
-robot.move_head(z=35)
-
-np.save(filename, coords)
 
 while True:
     filename=input("Enter a name: ")
