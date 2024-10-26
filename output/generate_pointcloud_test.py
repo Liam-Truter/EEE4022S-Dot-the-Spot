@@ -1,7 +1,7 @@
 import pyrealsense2 as rs
 import numpy as np
 
-def generate_pointcloud_from_depth(depth_image, intrinsics, depth_scale):
+def generate_pointcloud(depth_image, intrinsics, depth_scale):
     height, width = depth_image.shape
     pointcloud = []
 
@@ -16,8 +16,8 @@ def generate_pointcloud_from_depth(depth_image, intrinsics, depth_scale):
     return np.array(pointcloud)
 
 # Load depth data
-depth_image = np.load('output\depth_1727336390800_640x480.npy')
-
+depth_image = np.load('output\depth_1727338635804_480x270.npy')
+print(np.min(depth_image[depth_image>0]))
 # Approximate intrinsics for D455 at 640x480
 intrinsics = rs.intrinsics()
 intrinsics.width = 640
@@ -29,11 +29,11 @@ intrinsics.ppy = 237.7
 intrinsics.model = rs.distortion.brown_conrady
 intrinsics.coeffs = [0, 0, 0, 0, 0]
 
-# Depth scale (e.g., depth values in meters)
-depth_scale = 0.001  # If depth is in millimeters
+# Depth scale
+depth_scale = 0.001  
 
 # Generate point cloud
-pointcloud = generate_pointcloud_from_depth(depth_image, intrinsics, depth_scale)
+pointcloud = generate_pointcloud(depth_image, intrinsics, depth_scale)
 
 # Save point cloud
-np.savetxt("pointcloud.xyz", pointcloud)
+np.savetxt("pointcloud_480x270.xyz", pointcloud)
