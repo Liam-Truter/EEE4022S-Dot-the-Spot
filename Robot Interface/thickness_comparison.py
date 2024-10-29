@@ -31,11 +31,12 @@ for i in range(3):
 calibration_coords -= origin
 
 errors = np.zeros((9,96))
+height_offset = np.array([0,0,0.2])
 
 for i in range(len(corner_file_idxs)):
     corner_file_idx = corner_file_idxs[i]
     corner_file = os.path.join(output_dir, f'Corner info - {corner_file_idx}.npy')
-    corners = np.load(corner_file) - origin
+    corners = np.load(corner_file) - origin + height_offset
 
     X_corners = corners[:,0]
     Y_corners = corners[:,1]
@@ -43,7 +44,7 @@ for i in range(len(corner_file_idxs)):
 
     surface_file_idx = surface_file_idxs[i]
     surface_file = os.path.join(output_dir, f"Surface info - {surface_file_idx}.npy")
-    surface = np.load(surface_file) - origin
+    surface = np.load(surface_file) - origin + height_offset
 
     X_surface = surface[:,0]
     Y_surface = surface[:,1]
@@ -61,7 +62,7 @@ for i in range(len(corner_file_idxs)):
 
     a,b,d = fit_plane(corners)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(projection='3d')
 
     ax.scatter(X_corners,Y_corners,Z_corners, color='b')
@@ -93,6 +94,10 @@ for i in range(len(corner_file_idxs)):
     ax.plot_surface(X_grid, Y_grid, Z_grid, alpha=0.5, color='r')
 
     #print(f"z = {a:.2f}x + {b:.2f}y + {d:.2f}")
+    ax.set_xlabel("X (mm)")
+    ax.set_ylabel("Y (mm)")
+    ax.set_zlabel("Z (mm)")
+    plt.tight_layout()
 
 print("Total Error:")
 print("Mean\tMax\tMin\tRMSE")

@@ -19,15 +19,15 @@ def fit_plane(points: np.array) -> np.array:
 output_dir="output_contact"
 
 heights = np.array([
-           [6.2, 7.0, 5.8, 7.0],
-           [2.2, 2.5, 3.3, 2.3],
-           [6.5, 7.3, 6.0, 6.5],
-           [8.4, 6.5, 6.9, 8.6],
-           [5.0, 3.9, 3.5, 4.5],
-           [3.1, 4.4, 4.3, 3.8],
-           [4.5, 2.2, 5.0, 6.4],
-           [5.0, 4.5, 9.9, 9.8],
-           [5.5, 7.4, 5.7, 5.3]])
+           [6.0, 7.4, 7.7, 7.2],
+           [4.0, 3.8, 2.8, 2.2],
+           [6.8, 7.5, 5.9, 6.0],
+           [8.4, 7.6, 7.6, 9.5],
+           [5.5, 4.9, 3.7, 4.7],
+           [3.9, 5.5, 4.3, 4.2],
+           [4.9, 3.1, 5.1, 6.6],
+           [6.1, 5.3, 10.5, 10.2],
+           [5.7, 7.7, 6.1, 5.6]])
 surface_file_idxs = ['1.1', '2.1', '3', '4.1', '5', '6', '7', '8', '9']
 
 calib_coord_file = os.path.join(output_dir, 'Corner info - 0.npy')
@@ -41,6 +41,8 @@ calibration_coords -= origin
 
 errors = np.zeros((9,96))
 
+height_offset = np.array([0,0,0.2])
+
 for i in range(len(heights)):
     corner_heights = heights[i,:]
     corner_points = np.copy(calibration_coords)
@@ -48,7 +50,7 @@ for i in range(len(heights)):
 
     surface_file_idx = surface_file_idxs[i]
     surface_file = os.path.join(output_dir, f"Surface info - {surface_file_idx}.npy")
-    surface = np.load(surface_file) - origin
+    surface = np.load(surface_file) - origin + height_offset
 
     X_surface = surface[:,0]
     Y_surface = surface[:,1]
@@ -56,10 +58,11 @@ for i in range(len(heights)):
 
     a,b,d = fit_plane(corner_points)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(projection='3d')
 
     ax.scatter(X_surface,Y_surface,Z_surface, color='g')
+    ax.scatter(corner_points[:,0],corner_points[:,1],corner_points[:,2], color='b')
     ax.set_zlim(0,12)
 
     x_range = np.linspace(-60, 60, 10)
@@ -85,7 +88,11 @@ for i in range(len(heights)):
 
     ax.plot_surface(X_grid, Y_grid, Z_grid, alpha=0.5, color='r')
 
+    ax.set_xlabel("X (mm)")
+    ax.set_ylabel("Y (mm)")
+    ax.set_zlabel("Z (mm)")
     #print(f"z = {a:.2f}x + {b:.2f}y + {d:.2f}")
+    plt.tight_layout()
 
 print("Total Error:")
 print("Mean\tMax\tMin\tRMSE")

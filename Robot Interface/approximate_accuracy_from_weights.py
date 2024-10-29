@@ -19,7 +19,7 @@ def fit_plane(points: np.array) -> np.array:
 output_dir="output_contact"
 
 weights = [76.4, 21.1, 79.5, 94.5, 49.6, 39.8, 55.9, 81.9, 71.4]
-mmpg = 0.09
+mmpg = 0.096
 surface_file_idxs = ['1.1', '2.1', '3', '4.1', '5', '6', '7', '8', '9']
 
 calib_coord_file = os.path.join(output_dir, 'Corner info - 0.npy')
@@ -32,6 +32,7 @@ for i in range(3):
 calibration_coords -= origin
 
 errors = np.zeros((9,96))
+height_offset = np.array([0,0,0.2])
 
 for i in range(len(weights)):
     weight = weights[i]
@@ -39,7 +40,7 @@ for i in range(len(weights)):
 
     surface_file_idx = surface_file_idxs[i]
     surface_file = os.path.join(output_dir, f"Surface info - {surface_file_idx}.npy")
-    surface = np.load(surface_file) - origin
+    surface = np.load(surface_file) - origin + height_offset
 
     X_surface = surface[:,0]
     Y_surface = surface[:,1]
@@ -49,7 +50,7 @@ for i in range(len(weights)):
 
     a,b,d = (0,0,height_estimate)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(projection='3d')
 
     ax.scatter(X_surface,Y_surface,Z_surface, color='g')
@@ -78,7 +79,11 @@ for i in range(len(weights)):
 
     ax.plot_surface(X_grid, Y_grid, Z_grid, alpha=0.5, color='r')
 
+    ax.set_xlabel("X (mm)")
+    ax.set_ylabel("Y (mm)")
+    ax.set_zlabel("Z (mm)")
     #print(f"z = {a:.2f}x + {b:.2f}y + {d:.2f}")
+    plt.tight_layout()
 
 print("Total Error:")
 print("Mean\tMax\tMin\tRMSE")
