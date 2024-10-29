@@ -5,15 +5,17 @@ from weight_reader import Weight_reader
 
 class Scale:
     def __init__(self):
+        self.force_threshold = 0.5
+        self.z_clearance = 5
+    def start(self):
         self.weight_reader = Weight_reader()
         self.weight_reader.connect()
-        self.force_threshold = 0.5
     def calibrate(self, point: Vector):
         self.point = point
     def move_to(self, coord, corner=False, arc=True):
         x_corn = self.point['x']
         y_corn = self.point['y']
-        z_corn = self.point['z'] + 10
+        z_corn = self.point['z'] + self.z_clearance
         if corner:
             x_offset = 15
             y_offset = 15
@@ -47,7 +49,7 @@ class Scale:
     def find_depth(self, coord, corner=False, arc=False):
         self.move_to(coord, corner, arc)
 
-        z_corn = self.point['z'] + 10
+        z_corn = self.point['z'] + self.z_clearance
 
         while True:
             weight = self.weight_reader.get_weight()
@@ -87,6 +89,7 @@ class Scale:
         self.z = np.zeros((8,12))
         # Coordinates of the well points
         self.points = np.zeros((8,12,3))
+        self.rel_points = np.zeros_like(self.points)
 
         for i in range(8):
             for j in range(12):
@@ -94,6 +97,19 @@ class Scale:
                 self.z[i][j] = a*self.x[i] + b*self.y[j] + d + clearance
                 # Coordinate of well point at row, column
                 self.points[i][j] = np.array([self.x[i], self.y[j], self.z[i][j]])
+                self.rel_points = self.points - np.array(self.point.to_tuple())
+    
+    def spot_to(self, coord):
+        self.move_to(coord)
+        robot.move_head(z=self.z[coord[0]][coord[1]])
+
+    def save_coords(self):
+        np.save("POINTS.npy", self.points)
+    
+    def load_coords(self):
+        self.points = np.load("POINTS.npy")
+        return self.points
+
 def main():
     scale = Scale()
     if len(robot.get_serial_ports_list()) > 0:

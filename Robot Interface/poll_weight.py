@@ -4,7 +4,7 @@ import numpy as np
 weight_reader = Weight_reader()
 weight_reader.connect()
 
-samples = 1000
+samples = 10000
 
 weights = np.zeros(samples)
 

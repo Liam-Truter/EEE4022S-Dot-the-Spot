@@ -147,7 +147,7 @@ class Calibrator:
 def main():
     calibrator = Calibrator()
     robot.connect(robot.get_serial_ports_list()[0])
-    robot.home()
+    #robot.home()
     calibrator.start()
     print(robot._driver.get_head_position()['current'])
     plunger_positions = robot._driver.get_plunger_positions()

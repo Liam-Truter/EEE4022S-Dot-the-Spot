@@ -75,7 +75,7 @@ baseline_depth = 0
 corner_point = Vector(233.00, 0.00, -5.00)
 
 output_dir = "output_contact"
-calibrate = True
+calibrate = False
 if calibrate:
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -91,7 +91,7 @@ if calibrate:
         coord = find_depth(i, True)
         calib_coords[i+1,:] = np.array(coord.to_tuple())
 
-    filename = "Empty_plate_calib_v2.npy"
+    filename = "Empty_plate_calib_v3.npy"
     filename = os.path.join(output_dir,filename)
     np.save(filename, calib_coords)
 
