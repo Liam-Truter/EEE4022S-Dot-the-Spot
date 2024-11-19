@@ -1,4 +1,6 @@
-from opentrons import instruments, containers
+from opentrons import robot, instruments, containers
+
+robot.connect(robot.get_serial_ports_list()[0])
 
 p10_rack = containers.load('tiprack-10ul', 'A2')
 p1000_rack = containers.load('tiprack-1000ul', 'D2')
@@ -13,7 +15,6 @@ tube_rack = containers.load('tube-rack-15_50ml', 'C2')
 def serial_dilution(media_well, microbe_well, rows, cols, factor_horizontal=0.1, factor_vertical=0.5):
     global p1000_tip_counter
     volume = 400
-    p1000.pick_up_tip(p1000_rack.wells(p1000_tip_counter))
     target_wells = []
     for row in range(1,len(rows)):
         for col in range(len(cols)):
@@ -52,7 +53,22 @@ def serial_dilution(media_well, microbe_well, rows, cols, factor_horizontal=0.1,
                             trash=False)
 
 rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-cols = ['1', '2', '3', '4']
+cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
 p1000_tip_counter = 0
 p10_tip_counter = 0
-serial_dilution(tube_rack.wells('A4'), tube_rack_2.wells('A1'), rows, cols)
+
+p1000.pick_up_tip(p1000_rack[0])
+serial_dilution(tube_rack.wells('A4'), tube_rack_2.wells('A1'), rows, cols[0:4])
+
+p1000.drop_tip(p1000_rack[0])
+p1000.pick_up_tip(p1000_rack[1])
+
+serial_dilution(tube_rack.wells('A4'), tube_rack_2.wells('B1'), rows, cols[4:8], 0.2, 0.5)
+
+p1000.drop_tip(p1000_rack[1])
+p1000.pick_up_tip(p1000_rack[2])
+
+serial_dilution(tube_rack.wells('A4'), tube_rack_2.wells('C1'), rows, cols[8:12], 0.4, 0.5)
+
+p1000.drop_tip(p1000_rack[2])
+
